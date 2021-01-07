@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+###############################################################################
+# - Created for Finland to generate partner extracts from Socrates
+# - Resides on a store server in /opt/specsavers/partnerExtracts/ 
+#
+# Oct 2012 - warren.bowden@specsavers.com - Created
+###############################################################################
+
+DATESTAMP=`date +%Y%m%d%H%M`
+STORENUM=`cat /export/socrates/storenum`
+OUTPUT_FILE_PART_NAME="${STORENUM}-${DATESTAMP}-"
+OUTPUT_FILE_EXT=".csv"
+EXTRACT_DIR=/tmp/partnerExtracts
+INCFILE=partnerExtracts.inc
+QUERY_OUTPUT_FILE=/tmp/partnerExtract.txt
+SCRIPT_HOME=/opt/specsavers/partnerExtracts
+
+DB=soa
+DBUSER=root
+DBPWD=mysql
+COUNTER=1
+
+#-------------------------------------------------------
+function log()
+{
+	echo "$(date +%d/%m/%Y:%H:%M:%S): $@"  #| tee -a $LOG 
+}
+
+#-------------------------------------------------------
+function generateExtract()
+{
+	local extractName=$1
+	local counter=$2
+	local extractFileName=${EXTRACT_DIR}/${OUTPUT_FILE_PART_NAME}${extractName}${OUTPUT_FILE_EXT}
+	
+	local tmpFile=`mktemp -t extract.XXX`
+	
+	log "Creating file ${extractFileName} in $EXTRACT_DIR"
+	
+	source $INCFILE
+	#log "Running ${SQL[${counter}]}"
+	
+	mysql -u${DBUSER} -p${DBPWD} ${DB} -e "${SQL[${counter}]}"
+	
+	#echo "Header row is ${HEADER_ROW[${counter}]} into ${extractFileName}"
+	echo ${HEADER_ROW[${counter}]} > $extractFileName
+	cat $QUERY_OUTPUT_FILE >> $extractFileName
+	
+	log "Records created in ${extractFileName}:"
+	cat $extractFileName | wc -l
+	
+	rm -rf $QUERY_OUTPUT_FILE
+
+}
+
+#-------------------------------------------------------
+
+log "Starting Partner extract generation"
+cd $SCRIPT_HOME
+rm -rf $EXTRACT_DIR
+rm -rf $QUERY_OUTPUT_FILE
+mkdir $EXTRACT_DIR
+
+if [[ ! -f ${INCFILE} ]]
+then
+	log "ERROR: Could not locate the necessary $INCFILE file aborting"
+	exit 1
+fi
+source $INCFILE
+for extract in $EXTRACTS
+do
+	log "Generating extract $extract"
+	generateExtract $extract $COUNTER
+	COUNTER=`expr ${COUNTER} + 1`
+done
+
+ls -ltr $EXTRACT_DIR
+log "Store Partner extracts complete"
