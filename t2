@@ -1,11 +1,3 @@
-#!/bin/bash
-#
-###############################################################################
-# - Created for Finland to generate partner extracts from Socrates
-# - Resides on a store server in /opt/specsavers/partnerExtracts/ 
-#
-# Oct 2012 - warren.bowden@specsavers.com - Created
-###############################################################################
 
 DATESTAMP=`date +%Y%m%d%H%M`
 STORENUM=`cat /export/socrates/storenum`
