@@ -1,12 +1,5 @@
 #!/bin/bash
-#
-###############################################################################
-# - Initially created for Finland to generate '~' delimited extracts from Socrates
-# - If opening extract files in Excel beware of Excel formatting that may distort the data,   
-#    set formatting to text before opening the file.  
-#
-# Oct 2012 - warren.bowden@specsavers.com - Created
-###############################################################################
+
 
 EXTRACTS="Customers CustomerNotes AppointmentNotes Refracted Prescription Dispense OutsideRx HabitualRx ObjectiveAndIOP SightTest"
 #-------------------------------------------------------
